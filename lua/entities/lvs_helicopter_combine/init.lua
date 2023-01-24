@@ -10,6 +10,7 @@ function ENT:OnSpawn( PObj )
 
 	--self:AddRotor( pos, angle, radius, turn_speed_and_direction )
 	self.Rotor = self:AddRotor( Vector(0,0,65), Angle(15,0,0), 310, -4000 )
+	self.Rotor:SetRotorEffects( true )
 	self.Rotor:SetHP( 50 )
 	function self.Rotor:OnDestroyed( base )
 		local ID = base:LookupBone( "Chopper.Rotor_Blur" )

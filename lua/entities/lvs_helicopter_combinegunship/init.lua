@@ -23,23 +23,7 @@ function ENT:OnSpawn( PObj )
 	self:SetBody( Body )
 
 	local Rotor = self:AddRotor( Vector(-133,0,55), Angle(0,0,0), 0, 4000 )
-	function Rotor:CheckRotorClearance()
-		if self:GetDisabled() then self:DeleteRotorWash() return end
-
-		local base = self:GetBase()
-
-		if not IsValid( base ) then self:DeleteRotorWash() return end
-
-		if not base:GetEngineActive() then self:DeleteRotorWash() return end
-
-		local Radius = self:GetRadius()
-
-		if base:GetThrottle() > 0.5 then
-			self:CreateRotorWash()
-		else
-			self:DeleteRotorWash()
-		end
-	end
+	Rotor:SetRotorEffects( true )
 
 	local ID = Body:LookupAttachment( "muzzle" )
 	local Muzzle = Body:GetAttachment( ID )

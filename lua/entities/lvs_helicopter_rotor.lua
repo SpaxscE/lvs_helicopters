@@ -8,6 +8,8 @@ ENT.DoNotDuplicate = true
 
 ENT._LVS = true
 
+ENT.MinRotorEffectSize = 199
+
 function ENT:SetupDataTables()
 	self:NetworkVar( "Entity",0, "Base" )
 	self:NetworkVar( "Float",0, "NWRadius" )
@@ -19,6 +21,18 @@ function ENT:SetupDataTables()
 		self:SetSpeed( 4000 )
 		self:SetHP( 10 )
 	end
+end
+
+function ENT:SetRotorEffects( new )
+	self._fxShowAlways = new
+end
+
+function ENT:GetRotorEffects()
+	if isbool( self._fxShowAlways ) then
+		return self._fxShowAlways == true
+	end
+
+	return (self:GetRadius() > self.MinRotorEffectSize)
 end
 
 function ENT:GetRadius()
@@ -52,7 +66,7 @@ function ENT:CheckRotorClearance()
 
 	local Radius = self:GetRadius()
 
-	if base:GetThrottle() > 0.5 and Radius > 250 then
+	if base:GetThrottle() > 0.5 and self:GetRotorEffects() then
 		self:CreateRotorWash()
 	else
 		self:DeleteRotorWash()
