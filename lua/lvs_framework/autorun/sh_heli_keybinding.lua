@@ -51,14 +51,14 @@ hook.Add( "LVS:Initialize", "[LVS] - Helicopter - Keys", function()
 			category = "LVS-Helicopter",
 			name_menu = "Roll Right [Yaw in Direct Input]",
 			default = "+moveright",
-			cmd = "lvs_heli_roll_right"
+			cmd = "lvs_helicopter_roll_right"
 		},
 		{
 			name = "HELI_HOVER",
 			category = "LVS-Helicopter",
 			name_menu = "Hover",
 			default = "+speed",
-			cmd = "lvs_heli_hover"
+			cmd = "lvs_helicopter_hover"
 		},
 	}
 
