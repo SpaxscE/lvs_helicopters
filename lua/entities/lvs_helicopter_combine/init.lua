@@ -22,7 +22,7 @@ function ENT:OnSpawn( PObj )
 	end
 
 	self.TailRotor = self:AddRotor( Vector(-218,4,-1.8), Angle(0,0,90), 25, -6000 )
-	self.TailRotor:SetHP( 400 )
+	self.TailRotor:SetHP( 100 )
 	function self.TailRotor:OnDestroyed( base )
 		base:DestroySteering( -2.5 )
 		base:SnapTailRotor()
@@ -113,7 +113,7 @@ function ENT:OnCollision( data, physobj )
 
 			if part then
 				local dmginfo = DamageInfo()
-				dmginfo:SetDamage( 1000 )
+				dmginfo:SetDamage( 200 )
 				dmginfo:SetDamageType( DMG_CRUSH )
 				part:Callback( self, dmginfo )
 			end
