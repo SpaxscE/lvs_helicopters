@@ -91,6 +91,10 @@ function ENT:WeaponsInRange()
 	return self:AngleBetweenNormal( self:GetForward(), self:GetAimVector() ) < 75
 end
 
+function ENT:BellyInRange()
+	return self:AngleBetweenNormal( -self:GetUp(), self:GetAimVector() ) < 45
+end
+
 function ENT:InitWeapons()
 	local weapon = {}
 	weapon.Icon = Material("lvs/weapons/mg.png")
@@ -145,9 +149,10 @@ function ENT:InitWeapons()
 		bullet.Attacker 	= self:GetDriver()
 		bullet.Callback = function(att, tr, dmginfo)
 			local effectdata = EffectData()
-			effectdata:SetOrigin( tr.HitPos )
-			effectdata:SetNormal( tr.HitNormal )
-			util.Effect( "AR2Impact", effectdata, true, true )
+			effectdata:SetOrigin( tr.HitPos + tr.HitNormal )
+			effectdata:SetNormal( tr.HitNormal * 2 )
+			effectdata:SetRadius( 10 )
+			util.Effect( "cball_bounce", effectdata, true, true )
 		end
 		self:LVSFireBullet( bullet )
 
@@ -174,5 +179,62 @@ function ENT:InitWeapons()
 		end
 	end
 	weapon.OnSelect = function( ent ) ent:EmitSound("physics/metal/weapon_impact_soft3.wav") end
+	self:AddWeapon( weapon )
+
+	local color_red = Color(255,0,0,255)
+
+	local weapon = {}
+	weapon.Icon = Material("lvs/weapons/warplaser.png")
+	weapon.Ammo = -1
+	weapon.Delay = 4
+	weapon.HeatRateUp = 0
+	weapon.HeatRateDown = 0.05
+	weapon.Attack = function( ent )
+		if ent:GetAI() and not ent:BellyInRange() then return true end
+
+		ent:SetHeat( 100 )
+		ent:SetOverheated( true )
+
+		local effectdata = EffectData()
+			effectdata:SetOrigin( ent:GetPos() )
+			effectdata:SetEntity( ent:GetBody() )
+		util.Effect( "lvs_warpcannon_charge", effectdata )
+
+		timer.Simple( 2, function()
+			if not IsValid( ent ) then return end
+
+			local effectdata = EffectData()
+				effectdata:SetOrigin( ent:GetPos() )
+				effectdata:SetEntity( ent:GetBody() )
+			util.Effect( "lvs_warpcannon_fire", effectdata )
+
+			timer.Simple( 0.2, function()
+				if not IsValid( ent ) then return end
+
+				ent:FireBellyCannon()
+			end )
+		end )
+	end
+	weapon.OnSelect = function( ent ) ent:EmitSound("physics/metal/weapon_impact_soft3.wav") end
+	weapon.HudPaint = function( ent, X, Y, ply )
+		local base = ent:GetBody()
+
+		if not IsValid( base ) then return end
+
+		local Muzzle = base:GetAttachment( base:LookupAttachment( "bellygun" ) )
+
+		if not Muzzle then return end
+
+		local trace = util.TraceLine( {
+			start = Muzzle.Pos,
+			endpos = Muzzle.Pos + base:GetAimVector() * 50000,
+			mask = MASK_SOLID_BRUSHONLY
+		} )
+
+		local Pos2D = trace.HitPos:ToScreen()
+
+		ent:PaintCrosshairSquare( Pos2D, ent:BellyInRange() and color_white or color_red )
+		ent:LVSPaintHitMarker( Pos2D )
+	end
 	self:AddWeapon( weapon )
 end

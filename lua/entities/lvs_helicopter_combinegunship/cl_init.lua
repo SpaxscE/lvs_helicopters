@@ -1,6 +1,12 @@
 include("shared.lua")
 
 function ENT:PreDraw()
+	local Body = self:GetBody()
+
+	if not IsValid( Body ) then return false end
+
+	Body:DrawModel()
+
 	return false
 end
 
@@ -46,4 +52,41 @@ function ENT:AnimRotor()
 	if not IsValid( Body ) then return end
 
 	Body:ManipulateBoneAngles( 19, Rot )
+end
+
+function ENT:PaintCrosshairSquare( Pos2D, Col )
+	local X = Pos2D.x + 1
+	local Y = Pos2D.y + 1
+
+	local Size = 20
+
+	surface.SetDrawColor( 0, 0, 0, 80 )
+	surface.DrawLine( X - Size, Y + Size, X - Size * 0.5, Y + Size )
+	surface.DrawLine( X + Size, Y + Size, X + Size * 0.5, Y + Size )
+	surface.DrawLine( X - Size, Y + Size, X - Size, Y + Size * 0.5 )
+	surface.DrawLine( X - Size, Y - Size, X - Size, Y - Size * 0.5 )
+	surface.DrawLine( X + Size, Y + Size, X + Size, Y + Size * 0.5 )
+	surface.DrawLine( X + Size, Y - Size, X + Size, Y - Size * 0.5 )
+	surface.DrawLine( X - Size, Y - Size, X - Size * 0.5, Y - Size )
+	surface.DrawLine( X + Size, Y - Size, X + Size * 0.5, Y - Size )
+
+	if Col then
+		surface.SetDrawColor( Col.r, Col.g, Col.b, Col.a )
+	else
+		surface.SetDrawColor( 255, 255, 255, 255 )
+	end
+
+	X = Pos2D.x
+	Y = Pos2D.y
+
+	surface.DrawLine( X - Size, Y + Size, X - Size * 0.5, Y + Size )
+	surface.DrawLine( X + Size, Y + Size, X + Size * 0.5, Y + Size )
+	surface.DrawLine( X - Size, Y + Size, X - Size, Y + Size * 0.5 )
+	surface.DrawLine( X - Size, Y - Size, X - Size, Y - Size * 0.5 )
+	surface.DrawLine( X + Size, Y + Size, X + Size, Y + Size * 0.5 )
+	surface.DrawLine( X + Size, Y - Size, X + Size, Y - Size * 0.5 )
+	surface.DrawLine( X - Size, Y - Size, X - Size * 0.5, Y - Size )
+	surface.DrawLine( X + Size, Y - Size, X + Size * 0.5, Y - Size )
+
+	self:PaintCrosshairCenter( Pos2D, Col )
 end

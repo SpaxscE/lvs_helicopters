@@ -20,11 +20,28 @@ function ENT:PlayAnimation( animation, playbackrate )
 	self:SetSequence( sequence )
 end
 
+function ENT:GetAimVector()
+	local Parent = self:GetParent()
+
+	if not IsValid( Parent ) or not Parent.GetAimVector then return -self:GetUp() end
+
+	local Muzzle = self:GetAttachment( self:LookupAttachment( "bellygun" ) )
+
+	if not Muzzle then return -self:GetUp() end
+
+	local AimAng = self:WorldToLocalAngles( (Parent:GetEyeTrace().HitPos - Muzzle.Pos):Angle() )
+
+	AimAng.p = math.Clamp( AimAng.p, 45, 90 )
+
+	return self:LocalToWorldAngles( AimAng ):Forward()
+end
+
 if SERVER then
 	function ENT:Initialize()	
 		self:SetModel( "models/gunship.mdl" )
 		self:SetMoveType( MOVETYPE_NONE )
 		self:SetSolid( SOLID_NONE )
+		self:SetNoDraw( true )
 	end
 
 	function ENT:Think()	
