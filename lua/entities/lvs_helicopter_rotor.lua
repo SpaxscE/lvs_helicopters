@@ -171,7 +171,7 @@ if SERVER then
 	end
 
 	function ENT:OnTakeDamage( dmginfo )
-		if dmginfo:IsDamageType( DMG_BLAST ) then return end
+		if dmginfo:IsDamageType( DMG_BLAST + DMG_DISSOLVE ) then return end
 
 		local damage = dmginfo:GetDamage()
 
