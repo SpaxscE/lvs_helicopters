@@ -79,8 +79,13 @@ function ENT:HandleEngineSounds( vehicle )
 	end
 
 	if DrivingMe ~= self._lvsoldDrivingMe then
-		VolumeSetNow = true
 		self._lvsoldDrivingMe = DrivingMe
+
+		self:StopSounds()
+
+		self._oldEnActive = nil
+
+		return
 	end
 
 	local FT = RealFrameTime()
@@ -120,6 +125,8 @@ end
 function ENT:OnEngineActiveChanged( Active )
 	if not Active then self:StopSounds() end
 
+	local DrivingMe = LocalPlayer():lvsGetVehicle() == self:GetBase()
+
 	for id, data in pairs( self.EngineSounds ) do
 		if not isstring( data.sound ) then continue end
 
@@ -133,11 +140,11 @@ function ENT:OnEngineActiveChanged( Active )
 		self.EngineSounds[ id ].SoundLevel = data.SoundLevel or 100
 		self.EngineSounds[ id ].UseDoppler = data.UseDoppler ~= false
 
-		local sound = CreateSound( self, data.sound )
-		sound:SetSoundLevel( data.SoundLevel )
-		sound:PlayEx(0,100)
+		if data.sound_int and data.sound_int ~= data.sound and DrivingMe then
+			local sound = CreateSound( self, data.sound )
+			sound:SetSoundLevel( data.SoundLevel )
+			sound:PlayEx(0,100)
 
-		if data.sound_int and data.sound_int ~= data.sound then
 			if data.sound_int == "" then
 				self._ActiveSounds[ id ] = {
 					ext = sound,
@@ -154,7 +161,13 @@ function ENT:OnEngineActiveChanged( Active )
 				}
 			end
 		else
-			self._ActiveSounds[ id ] = sound
+			if DrivingMe or data.SoundLevel >= 90 then
+				local sound = CreateSound( self, data.sound )
+				sound:SetSoundLevel( data.SoundLevel )
+				sound:PlayEx(0,100)
+
+				self._ActiveSounds[ id ] = sound
+			end
 		end
 	end
 end
