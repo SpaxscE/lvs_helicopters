@@ -91,8 +91,17 @@ function ENT:PlayerDirectInput( ply, cmd )
 	if CLIENT then return end
 
 	if ply:lvsKeyDown( "HELI_HOVER" ) then
-		self:CalcHover(ply:lvsKeyDown( "-YAW_HELI" ), ply:lvsKeyDown( "+YAW_HELI" ), KeyPitchUp, KeyPitchDown, ply:lvsKeyDown( "+THRUST_HELI" ), ply:lvsKeyDown( "-THRUST_HELI" ) )
+		self:CalcHover( ply:lvsKeyDown( "-YAW_HELI" ), ply:lvsKeyDown( "+YAW_HELI" ), KeyPitchUp, KeyPitchDown, ply:lvsKeyDown( "+THRUST_HELI" ), ply:lvsKeyDown( "-THRUST_HELI" ) )
+
+		self.ResetSteer = true
+
 	else
+		if self.ResetSteer then
+			self.ResetSteer = nil
+
+			self:SetSteer( Vector(0,0,0) )
+		end
+
 		self:CalcThrust( ply:lvsKeyDown( "+THRUST_HELI" ), ply:lvsKeyDown( "-THRUST_HELI" ) )
 	end
 end
@@ -145,7 +154,16 @@ function ENT:PlayerMouseAim( ply, cmd )
 
 	if ply:lvsKeyDown( "HELI_HOVER" ) then
 		self:CalcHover( RollLeft, RollRight, PitchUp, PitchDown, ply:lvsKeyDown( "+THRUST_HELI" ), ply:lvsKeyDown( "-THRUST_HELI" ) )
+
+		self.ResetSteer = true
+
 	else
+		if self.ResetSteer then
+			self.ResetSteer = nil
+
+			self:SetSteer( Vector(0,0,0) )
+		end
+
 		self:CalcThrust( ply:lvsKeyDown( "+THRUST_HELI" ), ply:lvsKeyDown( "-THRUST_HELI" ) )
 	end
 end
