@@ -8,6 +8,10 @@ function ENT:OnRemoveAI()
 end
 
 function ENT:RunAI()
+	-- empty
+end
+
+function ENT:RunHeliAI( PhysObj, deltatime )
 	local RangerLength = 15000
 
 	local mySpeed = self:GetVelocity():Length()
@@ -99,8 +103,6 @@ function ENT:RunAI()
 			end
 		end
 	end
-
-	local PhysObj = self:GetPhysicsObject()
 
 	local VelL = PhysObj:WorldToLocal( PhysObj:GetPos() + PhysObj:GetVelocity() )
 	local AngVel = PhysObj:GetAngleVelocity()

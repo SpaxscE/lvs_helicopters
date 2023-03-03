@@ -6,6 +6,7 @@ AddCSLuaFile( "cl_hud.lua" )
 AddCSLuaFile( "cl_flyby.lua" )
 include("shared.lua")
 include("sv_ai.lua")
+include("sv_mouseaim.lua")
 include("sv_components.lua")
 include("sv_engine.lua")
 include("sv_vehiclespecific.lua")
@@ -23,7 +24,15 @@ function ENT:OnRemoveAI()
 	self:SetCollisionGroup( self.COL_GROUP_OLD or COLLISION_GROUP_NONE )
 end
 
-function ENT:ApproachTargetAngle( TargetAngle, OverridePitch, OverrideYaw, OverrideRoll, FreeMovement )
+function ENT:ApproachTargetAngle( TargetAngle, OverridePitch, OverrideYaw, OverrideRoll, FreeMovement, phys, deltatime )
+	if not IsValid( phys ) then
+		phys = self:GetPhysicsObject()
+	end
+
+	if not deltatime then
+		deltatime = FrameTime()
+	end
+
 	local LocalAngles = self:WorldToLocalAngles( TargetAngle )
 
 	local LocalAngPitch = LocalAngles.p
@@ -38,7 +47,7 @@ function ENT:ApproachTargetAngle( TargetAngle, OverridePitch, OverrideYaw, Overr
 	local WingFinFadeOut = math.max( (90 - AngDiff ) / 90, 0 )
 
 	local Ang = self:GetAngles()
-	local AngVel = self:GetPhysicsObject():GetAngleVelocity()
+	local AngVel = phys:GetAngleVelocity()
 
 	local SmoothPitch = math.Clamp( math.Clamp(AngVel.y / 50,-0.25,0.25) / math.abs( LocalAngPitch ), -1, 1 )
 	local SmoothYaw = math.Clamp( math.Clamp(AngVel.z / 50,-0.25,0.25) / math.abs( LocalAngYaw ), -1, 1 )
@@ -50,7 +59,7 @@ function ENT:ApproachTargetAngle( TargetAngle, OverridePitch, OverrideYaw, Overr
 
 	if self:GetThrottle() <= 0.5 then self.Roll = Ang.r end
 
-	self.Roll = self.Roll and self.Roll + ((OverrideRoll or 0) * self.TurnRateRoll * 70 * FrameTime()) or 0
+	self.Roll = self.Roll and self.Roll + ((OverrideRoll or 0) * self.TurnRateRoll * 70 * deltatime) or 0
 	local Roll = math.Clamp( self:WorldToLocalAngles( Angle(Ang.p,Ang.y,self.Roll) ).r / 45, -1 , 1)
 
 	if OverridePitch and OverridePitch ~= 0 then
@@ -90,6 +99,16 @@ function ENT:PhysicsSimulate( phys, deltatime )
 		Mul = 0
 	end
 
+	-- mouse aim needs to run at high speed.
+	if self:GetAI() then
+		self:RunHeliAI( phys, deltatime )
+	else
+		local ply = self:GetDriver()
+		if IsValid( ply ) and ply:lvsMouseAim() then
+			self:PlayerMouseAim( ply, phys, deltatime )
+		end
+	end
+
 	local Steer = self:GetSteer()
 
 	local Vel = phys:GetVelocity()
@@ -122,17 +141,19 @@ function ENT:PhysicsSimulate( phys, deltatime )
 	return ForceAngle, ForceLinear, SIM_GLOBAL_ACCELERATION
 end
 
-function ENT:ApproachThrust( New )
-	local Delta = FrameTime()
+function ENT:ApproachThrust( New, Delta )
+	if not Delta then
+		Delta = FrameTime()
+	end
 
 	local Cur = self:GetThrust()
 
 	self:SetThrust( Cur + (New - Cur) * Delta * self.ThrustRate * 2.5 )
 end
 
-function ENT:CalcThrust( KeyUp, KeyDown )
+function ENT:CalcThrust( KeyUp, KeyDown, Delta )
 	if self:HitGround() and not KeyUp then
-		self:ApproachThrust( -1 )
+		self:ApproachThrust( -1, Delta )
 		self.Roll = self:GetAngles().r
 
 		return
@@ -141,11 +162,13 @@ function ENT:CalcThrust( KeyUp, KeyDown )
 	local Up = KeyUp and 1 or 0
 	local Down = KeyDown and -1 or 0
 
-	self:ApproachThrust( Up + Down )
+	self:ApproachThrust( Up + Down, Delta )
 end
 
-function ENT:CalcHover( InputLeft, InputRight, InputUp, InputDown, ThrustUp, ThrustDown )
-	local PhysObj = self:GetPhysicsObject()
+function ENT:CalcHover( InputLeft, InputRight, InputUp, InputDown, ThrustUp, ThrustDown, PhysObj, deltatime )
+	if not IsValid( PhysObj ) then
+		PhysObj = self:GetPhysicsObject()
+	end
 
 	local VelL = PhysObj:WorldToLocal( PhysObj:GetPos() + PhysObj:GetVelocity() )
 	local AngVel = PhysObj:GetAngleVelocity()
@@ -174,10 +197,10 @@ function ENT:CalcHover( InputLeft, InputRight, InputUp, InputDown, ThrustUp, Thr
 	self.Roll = Ang.r
 
 	if ThrustUp or ThrustDown then
-		self:CalcThrust( ThrustUp, ThrustDown )
+		self:CalcThrust( ThrustUp, ThrustDown, deltatime )
 
 		return
 	end
 
-	self:ApproachThrust( math.Clamp(-VelL.z / 100,-1,1) )
+	self:ApproachThrust( math.Clamp(-VelL.z / 100,-1,1), deltatime )
 end
