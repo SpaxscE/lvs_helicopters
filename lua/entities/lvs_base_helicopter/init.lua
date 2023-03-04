@@ -101,7 +101,7 @@ function ENT:PhysicsSimulate( phys, deltatime )
 
 	-- mouse aim needs to run at high speed.
 	if self:GetAI() then
-		self:RunHeliAI( phys, deltatime )
+		self:CalcAIMove( phys, deltatime )
 	else
 		local ply = self:GetDriver()
 		if IsValid( ply ) and ply:lvsMouseAim() then

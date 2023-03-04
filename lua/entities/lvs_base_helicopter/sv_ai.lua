@@ -8,10 +8,6 @@ function ENT:OnRemoveAI()
 end
 
 function ENT:RunAI()
-	-- empty
-end
-
-function ENT:RunHeliAI( PhysObj, deltatime )
 	local RangerLength = 15000
 
 	local mySpeed = self:GetVelocity():Length()
@@ -77,10 +73,6 @@ function ENT:RunHeliAI( PhysObj, deltatime )
 	local alt = (StartPos - TraceDown.HitPos):Length()
 	local ceiling = (StartPos - TraceUp.HitPos):Length()
 
-	local WallDist = (StartPos - TraceForward.HitPos):Length()
-
-	local Throttle = math.min( WallDist / mySpeed, 1 )
-
 	self._AIFireInput = false
 
 	local Target = self:AIGetTarget()
@@ -104,24 +96,7 @@ function ENT:RunHeliAI( PhysObj, deltatime )
 		end
 	end
 
-	local VelL = PhysObj:WorldToLocal( PhysObj:GetPos() + PhysObj:GetVelocity() )
-	local AngVel = PhysObj:GetAngleVelocity()
-
-	local LPos = self:WorldToLocal( TargetPos )
-
-	local Pitch = math.Clamp(LPos.x * 0.01 - VelL.x * 0.01,-1,1) * 40
-	local Yaw = ((IsValid( Target ) and Target:GetPos() or TargetPos) - StartPos):Angle().y
-	local Roll = math.Clamp(VelL.y * 0.01,-1,1) * 40
-
-	local Ang = self:GetAngles()
-
-	local Steer = self:GetSteer()
-	Steer.x = math.Clamp( Roll - Ang.r - AngVel.x,-1,1)
-	Steer.y = math.Clamp( Pitch - Ang.p - AngVel.y,-1,1)
-	Steer.z = math.Clamp( self:WorldToLocalAngles( Angle(0,Yaw,0) ).y / 10,-1,1)
-
-	self:SetSteer( Steer )
-	self:SetThrust( math.Clamp( LPos.z - VelL.z,-1,1) )
+	self._lvsTargetPos = TargetPos
 
 	if IsValid( Target ) then
 		TargetPos = Target:LocalToWorld( Target:OBBCenter() )
@@ -158,6 +133,35 @@ function ENT:RunHeliAI( PhysObj, deltatime )
 	end
 
 	self:SetAIAimVector( (TargetPos - myPos):GetNormalized() )
+end
+
+function ENT:CalcAIMove( PhysObj, deltatime )
+	if not self._lvsTargetPos then return end
+
+	local StartPos = self:LocalToWorld( self:OBBCenter() )
+
+	local Target = self:AIGetTarget()
+
+	local TargetPos = self._lvsTargetPos
+
+	local VelL = PhysObj:WorldToLocal( PhysObj:GetPos() + PhysObj:GetVelocity() )
+	local AngVel = PhysObj:GetAngleVelocity()
+
+	local LPos = self:WorldToLocal( TargetPos )
+
+	local Pitch = math.Clamp(LPos.x * 0.01 - VelL.x * 0.01,-1,1) * 40
+	local Yaw = ((IsValid( Target ) and Target:GetPos() or TargetPos) - StartPos):Angle().y
+	local Roll = math.Clamp(VelL.y * 0.01,-1,1) * 40
+
+	local Ang = self:GetAngles()
+
+	local Steer = self:GetSteer()
+	Steer.x = math.Clamp( Roll - Ang.r - AngVel.x,-1,1)
+	Steer.y = math.Clamp( Pitch - Ang.p - AngVel.y,-1,1)
+	Steer.z = math.Clamp( self:WorldToLocalAngles( Angle(0,Yaw,0) ).y / 10,-1,1)
+
+	self:SetSteer( Steer )
+	self:SetThrust( math.Clamp( LPos.z - VelL.z,-1,1) )
 end
 
 function ENT:AISelectWeapon( ID )
