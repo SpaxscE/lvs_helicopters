@@ -88,11 +88,15 @@ function ENT:GetWheels()
 	return self._lvsWheels
 end
 
-function ENT:AddWheel( pos, radius, mass, type )
+function ENT:AddWheel( pos, radius, mass, type, canRetract )
 	if not isvector( pos ) or not isnumber( radius ) or not isnumber( mass ) then return end
 
 	if not type then
 		type = LVS.WHEEL_BRAKE
+	end
+
+	if canRetract == nil then
+		canRetract = true
 	end
 
 	local wheel = ents.Create( "lvs_fighterplane_wheel" )
@@ -174,6 +178,7 @@ function ENT:AddWheel( pos, radius, mass, type )
 		entity = wheel,
 		physobj = PhysObj,
 		mass = mass,
+		canRetract = canRetract
 	}
 
 	if not istable( self._lvsWheels ) then self._lvsWheels = {} end
