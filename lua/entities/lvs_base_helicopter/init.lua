@@ -12,6 +12,8 @@ include("sv_engine.lua")
 include("sv_vehiclespecific.lua")
 include("sv_damage_extension.lua")
 include("sh_camera_eyetrace.lua")
+include("sv_landinggear.lua")
+include("sv_wheels.lua")
 
 function ENT:OnCreateAI()
 	self:StartEngine()
@@ -101,7 +103,7 @@ function ENT:PhysicsSimulate( phys, deltatime )
 
 	-- mouse aim needs to run at high speed.
 	if self:GetAI() then
-		self:CalcAIMove( phys, deltatime )
+		self:RunHeliAI( phys, deltatime )
 	else
 		local ply = self:GetDriver()
 		if IsValid( ply ) and ply:lvsMouseAim() then
@@ -121,6 +123,9 @@ function ENT:PhysicsSimulate( phys, deltatime )
 	local Pitch = math.Clamp(Steer.y,-1,1) * self.TurnRatePitch
 	local Yaw = math.Clamp(Steer.z + GravityYaw * 0.25,-1,1) * self.TurnRateYaw * 60
 	local Roll = math.Clamp(Steer.x,-1,1) * 1.5 * self.TurnRateRoll
+
+	self:HandleLandingGear( deltatime )
+	self:SetWheelSteer( Steer.z * self.WheelSteerAngle )
 
 	local Ang = self:GetAngles()
 

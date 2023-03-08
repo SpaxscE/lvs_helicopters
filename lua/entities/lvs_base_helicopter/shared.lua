@@ -34,6 +34,11 @@ function ENT:SetupDataTables()
 	self:AddDT( "Vector", "AIAimVector" )
 	self:AddDT( "Float", "Throttle" )
 	self:AddDT( "Float", "NWThrust" )
+	self:AddDT( "Float", "LandingGear" )
+
+	if SERVER then
+		self:SetLandingGear( 1 )
+	end
 end
 
 function ENT:PlayerDirectInput( ply, cmd )
@@ -108,15 +113,16 @@ end
 
 function ENT:StartCommand( ply, cmd )
 	if self:GetDriver() ~= ply then return end
-
-	if SERVER then
+	
+	if SERVER and not self.WheelAutoRetract then
 		local KeyJump = ply:lvsKeyDown( "VSPEC" )
 
 		if self._lvsOldKeyJump ~= KeyJump then
 			self._lvsOldKeyJump = KeyJump
-
 			if KeyJump then
 				self:ToggleVehicleSpecific()
+				self:ToggleLandingGear()
+				self:PhysWake()
 			end
 		end
 	end
