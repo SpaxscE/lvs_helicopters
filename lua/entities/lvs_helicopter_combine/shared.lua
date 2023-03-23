@@ -276,6 +276,7 @@ function ENT:InitWeapons()
 	weapon.HeatRateDown = 0.4
 	weapon.Attack = function( ent )
 		local Driver = ent:GetDriver()
+		local vel = self:GetVelocity()
 
 		local projectile = ents.Create( "lvs_helicopter_combine_bomb" )
 		projectile:SetPos( ent:LocalToWorld( Vector(-50,0,-25) ) )
@@ -285,6 +286,7 @@ function ENT:InitWeapons()
 		projectile:Spawn()
 		projectile:Activate()
 		projectile:EmitSound("npc/attack_helicopter/aheli_mine_drop1.wav")
+		projectile:GetPhysicsObject():SetVelocity(vel)
 
 		ent:TakeAmmo()
 	end
