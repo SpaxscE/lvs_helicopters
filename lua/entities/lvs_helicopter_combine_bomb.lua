@@ -1,6 +1,7 @@
 AddCSLuaFile()
 
-ENT.Type            = "anim"
+ENT.Base = "lvs_bomb"
+DEFINE_BASECLASS( "lvs_bomb" )
 
 ENT.Spawnable       = false
 ENT.AdminSpawnable  = false
@@ -8,54 +9,45 @@ ENT.DoNotDuplicate = true
 
 ENT.ExplosionEffect = "lvs_explosion_small"
 
+function ENT:Initialize()
+	self:SetModel("models/Combine_Helicopter/helicopter_bomb01.mdl")
+	self:SetMoveType( MOVETYPE_NONE )
+	self:SetSkin( 1 )
+end
+
 if SERVER then
-	function ENT:SetAttacker( ent ) self._attacker = ent end
-	function ENT:GetAttacker() return self._attacker or NULL end
-
-	function ENT:Initialize()	
-		self:SetModel("models/Combine_Helicopter/helicopter_bomb01.mdl")
-		self:SetMoveType( MOVETYPE_VPHYSICS )
-		self:PhysicsInit( SOLID_VPHYSICS )
-		self:SetSkin( 1 )
-
-		self.DieTime = CurTime() + 30
-
-		self:PhysWake()
-
-		self:SetModelScale( 0 )
-		self:SetModelScale( 1, 0.25 )
-	end
-
 	function ENT:OnTakeDamage( dmginfo )
-		if self.IsEnabled then
+		if self.IsTimerStarted then
 			self:Detonate()
 		else
-			self:Enable()
+			self:StartDetonationTimer()
 		end
 	end
 
-	function ENT:Think()
+	function ENT:Think()	
 		local T = CurTime()
 
-		self:NextThink( T + 0.5 )
+		self:NextThink( T )
 
-		if not self.DieTime then return true end
+		self:UpdateTrajectory()
 
-		if not self.IsEnabled and self.DieTime < T then
-			self:Destroy()
+		if not self.SpawnTime then return true end
+
+		if (self.SpawnTime + 30) < T then
+			if self.IsTimerStarted then
+				self:Detonate()
+			else
+				self:Destroy()
+			end
 		end
 
 		return true
 	end
 
-	function ENT:UpdateTransmitState() 
-		return TRANSMIT_ALWAYS
-	end
+	function ENT:StartDetonationTimer()
+		if self.IsTimerStarted then return end
 
-	function ENT:Enable()
-		if self.IsEnabled then return end
-
-		self.IsEnabled = true
+		self.IsTimerStarted = true
 
 		self.snd = CreateSound( self, "npc/attack_helicopter/aheli_mine_seek_loop1.wav" )
 		self.snd:PlayEx( 0, 100 )
@@ -90,30 +82,14 @@ if SERVER then
 		end )
 	end
 
-	function ENT:PhysicsCollide( data, physobj )
-		if self.IsEnabled and IsValid( data.HitEntity ) then
+	function ENT:PhysicsCollide( data )
+		if istable( self._FilterEnts ) and self._FilterEnts[ data.HitEntity ] then return end
+
+		if IsValid( data.HitEntity ) then
 			self:Detonate()
 		else
-			self:Enable()
+			self:StartDetonationTimer()
 		end
-	end
-
-	function ENT:Detonate()
-		if self.IsDetonated then return end
-
-		self.IsDetonated = true
-
-		local Pos = self:GetPos() 
-
-		local effectdata = EffectData()
-			effectdata:SetOrigin( Pos )
-		util.Effect( self.ExplosionEffect, effectdata )
-
-		local attacker = self:GetAttacker()
-
-		util.BlastDamage( self, IsValid( attacker ) and attacker or game.GetWorld(), Pos, 250, 150 )
-
-		SafeRemoveEntityDelayed( self, FrameTime() )
 	end
 
 	function ENT:Destroy()
@@ -132,15 +108,20 @@ if SERVER then
 	end
 
 	function ENT:OnRemove()
-		if not self.snd then return end
+		if self.snd then
+			self.snd:Stop()
+			self.snd = nil
+		end
 
-		self.snd:Stop()
-		self.snd = nil
+		BaseClass.OnRemove( self )
 	end
 
 	return
 end
 
-function ENT:Draw()
-	self:DrawModel()
+function ENT:Enable()
+	if self.IsEnabled then return end
+
+	self.IsEnabled = true
 end
+

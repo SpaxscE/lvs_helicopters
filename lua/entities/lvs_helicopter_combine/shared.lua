@@ -272,26 +272,40 @@ function ENT:InitWeapons()
 	weapon.UseableByAI = false
 	weapon.Ammo = 128
 	weapon.Delay = 0.25
-	weapon.HeatRateUp = 0.75
+	weapon.HeatRateUp = -0.4
 	weapon.HeatRateDown = 0.4
-	weapon.Attack = function( ent )
+	weapon.StartAttack = function( ent )
 		local Driver = ent:GetDriver()
-		local vel = self:GetVelocity()
 
 		local projectile = ents.Create( "lvs_helicopter_combine_bomb" )
 		projectile:SetPos( ent:LocalToWorld( Vector(-50,0,-25) ) )
 		projectile:SetAngles( ent:GetAngles() )
-		projectile:SetOwner( ent )
-		projectile:SetAttacker( IsValid( Driver ) and Driver or ent )
+		projectile:SetParent( ent )
 		projectile:Spawn()
 		projectile:Activate()
-		projectile:EmitSound("npc/attack_helicopter/aheli_mine_drop1.wav")
-		projectile:GetPhysicsObject():SetVelocity(vel)
+		projectile:SetAttacker( IsValid( Driver ) and Driver or ent )
+		projectile:SetEntityFilter( ent:GetCrosshairFilterEnts() )
+		projectile:SetSpeed( ent:GetVelocity() )
+		projectile:SetDamage( 150 )
+		projectile:SetRadius( 250 )
+
+		self._ProjectileEntity = projectile
+	end
+	weapon.FinishAttack = function( ent )
+		if not IsValid( ent._ProjectileEntity ) then return end
+
+		ent._ProjectileEntity:Enable()
+		ent._ProjectileEntity:EmitSound("npc/attack_helicopter/aheli_mine_drop1.wav")
 
 		ent:TakeAmmo()
+
+		ent:SetHeat( ent:GetHeat() + 0.2 )
+
+		if ent:GetHeat() >= 1 then
+			ent:SetOverheated( true )
+		end
 	end
 	self:AddWeapon( weapon )
-
 
 	local weapon = {}
 	weapon.Icon = Material("lvs/weapons/light.png")
