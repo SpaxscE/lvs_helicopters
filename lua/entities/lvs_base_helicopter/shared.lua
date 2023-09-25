@@ -145,3 +145,7 @@ end
 function ENT:GetThrustStrenght()
 	return (1 - (self:GetVelocity():Length() / self.MaxVelocity)) * self:GetThrustPercent()
 end
+
+function ENT:GetVehicleType()
+	return "helicopter"
+end
