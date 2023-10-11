@@ -105,5 +105,5 @@ function ENT:PreDrawTranslucent()
 		self.projector:Update()
 	end
 
-	return true
+	return false
 end
