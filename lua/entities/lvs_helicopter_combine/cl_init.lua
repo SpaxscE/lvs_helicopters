@@ -72,12 +72,12 @@ function ENT:PreDrawTranslucent()
 	if not self:GetLightsEnabled() then 
 		self:RemoveLight()
 
-		return false
+		return true
 	end
 
 	local SpotLight = self:GetAttachment( self:LookupAttachment( "SpotLight" ) )
 
-	if not SpotLight then return end
+	if not SpotLight then return true end
 
 	if not IsValid( self.projector ) then
 		local thelamp = ProjectedTexture()
