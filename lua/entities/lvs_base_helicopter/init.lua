@@ -84,7 +84,7 @@ function ENT:OnSkyCollide( data, PhysObj )
 end
 
 function ENT:PhysicsSimulate( phys, deltatime )
-	phys:Wake()
+	if self:GetEngineActive() then phys:Wake() end
 
 	local WorldGravity = self:GetWorldGravity()
 	local WorldUp = self:GetWorldUp()
