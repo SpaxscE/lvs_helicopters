@@ -6,6 +6,9 @@ ENT.Author = "Luna"
 ENT.Information = "Combine Synth Gunship from Half Life 2 + Episodes"
 ENT.Category = "[LVS] - Helicopters"
 
+ENT.VehicleCategory = "Helicopters"
+ENT.VehicleSubCategory = "Combine"
+
 ENT.Spawnable			= true
 ENT.AdminSpawnable		= false
 

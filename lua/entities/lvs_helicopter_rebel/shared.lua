@@ -6,6 +6,9 @@ ENT.Author = "Luna"
 ENT.Information = "Transport Helicopter as seen in Half Life 2 Episode 2"
 ENT.Category = "[LVS] - Helicopters"
 
+ENT.VehicleCategory = "Helicopters"
+ENT.VehicleSubCategory = "Resistance"
+
 ENT.Spawnable			= true
 ENT.AdminSpawnable		= false
 
