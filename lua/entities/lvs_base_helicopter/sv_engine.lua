@@ -55,6 +55,8 @@ function ENT:StartEngine()
 		return
 	end
 
+	self:PhysWake()
+
 	self:SetEngineActive( true )
 	self:OnEngineActiveChanged( true )
 
