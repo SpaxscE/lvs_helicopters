@@ -42,10 +42,6 @@ function ENT:ApproachTargetAngle( TargetAngle, OverridePitch, OverrideYaw, Overr
 	local TargetForward = TargetAngle:Forward()
 	local Forward = self:GetForward()
 
-	local AngDiff = math.deg( math.acos( math.Clamp( Forward:Dot( TargetForward ) ,-1,1) ) )
-
-	local WingFinFadeOut = math.max( (90 - AngDiff ) / 90, 0 )
-
 	local Ang = self:GetAngles()
 	local AngVel = phys:GetAngleVelocity()
 
@@ -54,7 +50,7 @@ function ENT:ApproachTargetAngle( TargetAngle, OverridePitch, OverrideYaw, Overr
 
 	local VelL = self:WorldToLocal( self:GetPos() + self:GetVelocity() )
 
-	local Pitch = math.Clamp(-LocalAngPitch / 10 + SmoothPitch,-1,1) * WingFinFadeOut
+	local Pitch = math.Clamp(-LocalAngPitch / 10 + SmoothPitch,-1,1)
 	local Yaw = math.Clamp(-LocalAngYaw + SmoothYaw,-1,1)
 
 	if self:GetThrottle() <= 0.5 then self.Roll = Ang.r end
