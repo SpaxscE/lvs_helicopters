@@ -1,0 +1,2 @@
+version=34
+url=https://raw.githubusercontent.com/SpaxscE/lvs_helicopters/main/data_static/lvs/2922255746.txt
