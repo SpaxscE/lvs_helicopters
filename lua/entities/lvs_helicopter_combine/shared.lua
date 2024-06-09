@@ -12,6 +12,8 @@ ENT.VehicleSubCategory = "Combine"
 ENT.Spawnable			= true
 ENT.AdminSpawnable		= false
 
+ENT.DisableBallistics = true
+
 ENT.MDL = "models/Combine_Helicopter.mdl"
 ENT.GibModels = {
 	"models/gibs/helicopter_brokenpiece_01.mdl",
@@ -181,7 +183,7 @@ function ENT:ShootGun()
 	bullet.Dir 	= (trace.HitPos - Muzzle.Pos):GetNormalized()
 	bullet.Spread 	= Vector(0.06,0.06,0.06)
 	bullet.TracerName = "lvs_pulserifle_tracer"
-	bullet.Force	= 10
+	bullet.Force	= 1000
 	bullet.HullSize 	= 6
 	bullet.Damage	= 6
 	bullet.Velocity = 15000
