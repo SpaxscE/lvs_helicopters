@@ -12,6 +12,8 @@ ENT.VehicleSubCategory = "Combine"
 ENT.Spawnable			= true
 ENT.AdminSpawnable		= false
 
+ENT.DisableBallistics = true
+
 ENT.MDL = "models/blu/combine_gunship.mdl"
 ENT.GibModels = {
 	"models/gibs/gunship_gibs_engine.mdl",
@@ -145,7 +147,7 @@ function ENT:InitWeapons()
 		bullet.Dir 	= (trace.HitPos - Muzzle.Pos):GetNormalized()
 		bullet.Spread 	= Vector(0.02,0.02,0.02)
 		bullet.TracerName = "lvs_pulserifle_tracer_large"
-		bullet.Force	= 10
+		bullet.Force	= 2000
 		bullet.HullSize 	= 6
 		bullet.Damage	= 18
 		bullet.Velocity = 12000
