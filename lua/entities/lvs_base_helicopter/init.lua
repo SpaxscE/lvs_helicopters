@@ -52,11 +52,13 @@ function ENT:ApproachTargetAngle( TargetAngle, OverridePitch, OverrideYaw, Overr
 
 	local Pitch = math.Clamp(-LocalAngPitch / 10 + SmoothPitch,-1,1)
 	local Yaw = math.Clamp(-LocalAngYaw + SmoothYaw,-1,1)
+	local Roll = math.Clamp(LocalAngRoll / 100 + Yaw * 0.25 + math.Clamp(VelL.y / math.abs( VelL.x ) / 10,-0.25,0.25),-1,1)
 
-	if self:GetThrottle() <= 0.5 then self.Roll = Ang.r end
+	if OverrideRoll ~= 0 then
+		Roll = math.Clamp( self:WorldToLocalAngles( Angle( Ang.p, Ang.y, OverrideRoll * 60 ) ).r / 40,-1,1)
+	end
 
-	self.Roll = self.Roll and self.Roll + ((OverrideRoll or 0) * self.TurnRateRoll * 70 * deltatime) or 0
-	local Roll = math.Clamp( self:WorldToLocalAngles( Angle(Ang.p,Ang.y,self.Roll) ).r / 45, -1 , 1)
+	self.Roll = Roll
 
 	if OverridePitch and OverridePitch ~= 0 then
 		Pitch = OverridePitch
