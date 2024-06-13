@@ -24,7 +24,7 @@ ENT.GibModels = {
 	"models/gibs/helicopter_brokenpiece_05_tailfan.mdl",
 }
 
-ENT.AITEAM = 1
+ENT.AITEAM = 4
 
 ENT.MaxHealth = 1600
 
