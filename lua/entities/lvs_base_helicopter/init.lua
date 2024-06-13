@@ -84,6 +84,8 @@ end
 function ENT:PhysicsSimulate( phys, deltatime )
 	if self:GetEngineActive() then phys:Wake() end
 
+	local EntTable = self:GetTable()
+
 	local WorldGravity = self:GetWorldGravity()
 	local WorldUp = self:GetWorldUp()
 
@@ -91,7 +93,7 @@ function ENT:PhysicsSimulate( phys, deltatime )
 	local Left = -self:GetRight()
 
 	local Mul = self:GetThrottle()
-	local InputThrust = math.min( self:GetThrust() , 0 ) * self.ThrustDown + math.max( self:GetThrust(), 0 ) * self.ThrustUp
+	local InputThrust = math.min( self:GetThrust() , 0 ) * EntTable.ThrustDown + math.max( self:GetThrust(), 0 ) * EntTable.ThrustUp
 
 	if self:HitGround() and InputThrust <= 0 then
 		Mul = 0
@@ -114,26 +116,26 @@ function ENT:PhysicsSimulate( phys, deltatime )
 
 	local YawPull = (math.deg( math.acos( math.Clamp( WorldUp:Dot( Left ) ,-1,1) ) ) - 90) /  90
 
-	local GravityYaw = math.abs( YawPull ) ^ 1.25 * self:Sign( YawPull ) * (WorldGravity / 100) * (math.min( Vector(VelL.x,VelL.y,0):Length() / self.MaxVelocity,1) ^ 2)
+	local GravityYaw = math.abs( YawPull ) ^ 1.25 * self:Sign( YawPull ) * (WorldGravity / 100) * (math.min( Vector(VelL.x,VelL.y,0):Length() / EntTable.MaxVelocity,1) ^ 2)
 
-	local Pitch = math.Clamp(Steer.y,-1,1) * self.TurnRatePitch
-	local Yaw = math.Clamp(Steer.z + GravityYaw * 0.25,-1,1) * self.TurnRateYaw * 60
-	local Roll = math.Clamp(Steer.x,-1,1) * 1.5 * self.TurnRateRoll
+	local Pitch = math.Clamp(Steer.y,-1,1) * EntTable.TurnRatePitch
+	local Yaw = math.Clamp(Steer.z + GravityYaw * 0.25,-1,1) * EntTable.TurnRateYaw * 60
+	local Roll = math.Clamp(Steer.x,-1,1) * 1.5 * EntTable.TurnRateRoll
 
 	local Ang = self:GetAngles()
 
 	local FadeMul = (1 - math.max( (45 - self:AngleBetweenNormal( WorldUp, Up )) / 45,0)) ^ 2
-	local ThrustMul = math.Clamp( 1 - (Vel:Length() / self.MaxVelocity) * FadeMul, 0, 1 )
+	local ThrustMul = math.Clamp( 1 - (Vel:Length() / EntTable.MaxVelocity) * FadeMul, 0, 1 )
 
 	local Thrust = self:LocalToWorldAngles( Angle(Pitch,0,Roll) ):Up() * (WorldGravity + InputThrust * 500 * ThrustMul) * Mul
 
 	local Force, ForceAng = phys:CalculateForceOffset( Thrust, phys:LocalToWorld( phys:GetMassCenter() ) + self:GetUp() * 1000 )
 
-	local ForceLinear = (Force - Vel * 0.15 * self.ForceLinearDampingMultiplier) * Mul
-	local ForceAngle = (ForceAng + (Vector(0,0,Yaw) - phys:GetAngleVelocity() * 1.5 * self.ForceAngleDampingMultiplier) * deltatime * 250) * Mul
+	local ForceLinear = (Force - Vel * 0.15 * EntTable.ForceLinearDampingMultiplier) * Mul
+	local ForceAngle = (ForceAng + (Vector(0,0,Yaw) - phys:GetAngleVelocity() * 1.5 * EntTable.ForceAngleDampingMultiplier) * deltatime * 250) * Mul
 
-	if self._SteerOverride then
-		ForceAngle.z = (self._SteerOverrideMove * math.max( self:GetThrust() * 2, 1 ) * 100 - phys:GetAngleVelocity().z) * Mul
+	if EntTable._SteerOverride then
+		ForceAngle.z = (EntTable._SteerOverrideMove * math.max( self:GetThrust() * 2, 1 ) * 100 - phys:GetAngleVelocity().z) * Mul
 	end
 
 	return ForceAngle, ForceLinear, SIM_GLOBAL_ACCELERATION
