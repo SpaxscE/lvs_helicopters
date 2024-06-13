@@ -26,7 +26,7 @@ ENT.GibModels = {
 	"models/gibs/gunship_gibs_wing.mdl",
 }
 
-ENT.AITEAM = 4
+ENT.AITEAM = 1
 
 ENT.MaxHealth = 1600
 
