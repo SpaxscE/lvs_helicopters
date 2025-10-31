@@ -41,6 +41,8 @@ ENT.TurnRatePitch = 0.75
 ENT.TurnRateYaw = 1
 ENT.TurnRateRoll = 0.75
 
+ENT.GravityTurnRateYaw = 2
+
 ENT.ForceLinearDampingMultiplier = 1.5
 
 ENT.ForceAngleMultiplier = 1
