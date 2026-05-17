@@ -75,6 +75,16 @@ function ENT:OnSpawn( PObj )
 	end
 end
 
+function ENT:DoMissileDistraction()
+	if not self:CanDoMissileDistraction() then return end
+
+	self:CreateFlares( Vector(0,0,-25), Angle(-5,0,0), 2 )
+	self:CreateFlares( Vector(0,50,-25), Angle(-5,120,0), 2 )
+	self:CreateFlares( Vector(0,-50,-25), Angle(-5,-120,0), 2 )
+
+	self:SetNextMissileDistraction( 8 )
+end
+
 function ENT:SetRotor( PhysRot )
 	self:SetBodygroup( 1, PhysRot and 0 or 1 ) 
 end

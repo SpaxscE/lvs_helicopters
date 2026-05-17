@@ -49,6 +49,16 @@ function ENT:OnSpawn( PObj )
 	self.weaponSND:SetParent( self, ID )
 end
 
+function ENT:DoMissileDistraction()
+	if not self:CanDoMissileDistraction() then return end
+
+	self:CreateFlares( Vector(0,0,-25), Angle(-5,0,0), 1 )
+	self:CreateFlares( Vector(0,50,-25), Angle(-5,120,0), 1 )
+	self:CreateFlares( Vector(0,-50,-25), Angle(-5,-120,0), 1 )
+
+	self:SetNextMissileDistraction( 8 )
+end
+
 function ENT:SnapTailRotor()
 	if self.TailDestroyed then return end
 
